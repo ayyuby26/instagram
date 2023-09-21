@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "702409707946",
+    "project_id": "ayyuby",
+    "storage_bucket": "ayyuby.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702409707946:android:b1f07002a3696a430b9bd3",
+        "android_client_info": {
+          "package_name": "com.ayyuby.instagram"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT7M9RWdP39TvogMR9PQVa2Ge70zDeSCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

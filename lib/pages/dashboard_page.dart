@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:instagram/models/content_model.dart';
 import 'package:instagram/pages/notification_page.dart';
+import 'package:instagram/service/contents_service.dart';
 import 'package:instagram/widgets/content.dart';
 import 'package:instagram/data_source/dummy.dart';
 import 'package:instagram/shared/my_icon_btn.dart';
@@ -19,7 +23,37 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int index = 0;
+  List<ContentModel> contentsData = [];
+  
+  final storage = FirebaseStorage.instance;
+  final db = FirebaseFirestore.instance;
+
+  int indexPage = 0;
+
+  @override
+  void initState() {
+    onLoad(loadData);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      home,
+      const SearchPage(),
+      const NewPostPage(),
+      const ReelsPage(),
+      const ProfilePage(),
+    ];
+
+    return Scaffold(
+      bottomNavigationBar: bottomNavBar,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: pages[indexPage],
+      ),
+    );
+  }
 
   Widget get topRow {
     return Padding(
@@ -162,25 +196,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      home,
-      const SearchPage(),
-      const NewPostPage(),
-      const ReelsPage(),
-      const ProfilePage(),
-    ];
-
-    return Scaffold(
-      bottomNavigationBar: bottomNavBar,
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: pages[index],
-      ),
-    );
-  }
-
   get bottomNavBar {
     return Container(
       height: 50,
@@ -194,53 +209,53 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           MyIconBtn(
             onTap: () {
-              index = 0;
+              indexPage = 0;
               setState(() {});
             },
             icon: HeroIcon(
               HeroIcons.home,
-              style: index == 0 ? HeroIconStyle.solid : HeroIconStyle.outline,
+              style: indexPage == 0 ? HeroIconStyle.solid : HeroIconStyle.outline,
             ),
           ),
           MyIconBtn(
             onTap: () {
-              index = 1;
+              indexPage = 1;
               setState(() {});
             },
             icon: HeroIcon(
-              index == 1 ? HeroIcons.magnifyingGlassCircle : HeroIcons.magnifyingGlass,
-              style: index == 1 ? HeroIconStyle.solid : HeroIconStyle.outline,
+              indexPage == 1 ? HeroIcons.magnifyingGlassCircle : HeroIcons.magnifyingGlass,
+              style: indexPage == 1 ? HeroIconStyle.solid : HeroIconStyle.outline,
             ),
           ),
           MyIconBtn(
             onTap: () {
-              index = 2;
+              indexPage = 2;
               setState(() {});
             },
             icon: HeroIcon(
               HeroIcons.plusCircle,
-              style: index == 2 ? HeroIconStyle.solid : HeroIconStyle.outline,
+              style: indexPage == 2 ? HeroIconStyle.solid : HeroIconStyle.outline,
             ),
           ),
           MyIconBtn(
             onTap: () {
-              index = 3;
+              indexPage = 3;
               setState(() {});
             },
             icon: HeroIcon(
               HeroIcons.film,
-              style: index == 3 ? HeroIconStyle.solid : HeroIconStyle.outline,
+              style: indexPage == 3 ? HeroIconStyle.solid : HeroIconStyle.outline,
             ),
           ),
           MyIconBtn(
             onTap: () {
-              index = 4;
+              indexPage = 4;
               setState(() {});
             },
             icon: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(99),
-                border: Border.all(color: index == 4 ? Colors.black : Colors.grey, width: index == 4 ? 2 : 1),
+                border: Border.all(color: indexPage == 4 ? Colors.black : Colors.grey, width: indexPage == 4 ? 2 : 1),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(99),
@@ -262,7 +277,13 @@ class _DashboardPageState extends State<DashboardPage> {
     return CustomScrollView(
       slivers: <Widget>[
         appBar,
-        contents,
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => topRow,
+            childCount: 1,
+          ),
+        ),
+        contentsWidget,
       ],
     );
   }
@@ -275,11 +296,11 @@ class _DashboardPageState extends State<DashboardPage> {
     ];
   }
 
-  Widget get contents {
+  Widget get contentsWidget {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (context, index) => index == 0 ? topRow : const Content(),
-        childCount: 50,
+        (context, index) => Content(contentsData[index]),
+        childCount: contentsData.length,
       ),
     );
   }
@@ -348,10 +369,14 @@ class _DashboardPageState extends State<DashboardPage> {
 
   get appBarStyle {
     return const BoxDecoration(
-      // border: Border(
-      //   bottom: BorderSide(color: Colors.grey[300]!),
-      // ),
       color: Colors.white,
     );
+  }
+
+  void loadData() async {
+    final service = ContentsService(storage, db);
+    contentsData = await service.fetchContents();
+    await service.loadBinary(contentsData);
+    setState(() {});
   }
 }

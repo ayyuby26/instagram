@@ -2,11 +2,17 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:instagram/data_source/dummy.dart';
+import 'package:instagram/models/content_model.dart';
 import 'package:instagram/shared/my_icon_btn.dart';
 import 'package:instagram/shared/util.dart';
 
 class Content extends StatefulWidget {
-  const Content({super.key});
+  final ContentModel content;
+
+  const Content(
+    this.content, {
+    super.key,
+  });
 
   @override
   State<Content> createState() => _ContentState();
@@ -57,9 +63,15 @@ class _ContentState extends State<Content> {
         setState(() {});
       },
       child: Image.network(
-        contentImageUrl,
+        widget.content.contentUrl,
         width: double.maxFinite,
         fit: BoxFit.fitWidth,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return const CircularProgressIndicator();
+        },
       ),
     );
   }
@@ -72,7 +84,7 @@ class _ContentState extends State<Content> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("53 likes"),
+            Text("${widget.content.likes} likes"),
             description,
             comment,
             time,
@@ -92,7 +104,7 @@ class _ContentState extends State<Content> {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           TextSpan(
-            text: ' yang kamu pake mouse gaming ranknya udah apa? jawab ya karena aku kepo bingit, jangan bikin aku marah ya, awas ya kamu uhk uhk uhk',
+            text: ' ${widget.content.description}',
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 maxLines = 99;

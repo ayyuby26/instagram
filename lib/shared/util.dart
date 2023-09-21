@@ -26,3 +26,7 @@ MaterialColor getMaterialColor(Color color) {
 
   return MaterialColor(color.value, shades);
 }
+
+Future<void> onLoad(void Function()? x) async {
+  await Future.delayed(Duration.zero, x);
+}
